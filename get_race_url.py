@@ -24,6 +24,7 @@ from selenium.webdriver.support.ui import Select,WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.service import Service
 URL = "https://db.netkeiba.com/?pid=race_search_detail"
 WAIT_SECOND = 5
 
@@ -31,7 +32,8 @@ WAIT_SECOND = 5
 def get_race_url():
     options = Options()
     options.add_argument('--headless')
-    driver = webdriver.Chrome(options=options) # mac はbrewでインストールしたのでpathはok
+    service = Service("/chromedriver")
+    driver = webdriver.Chrome(service=service, options=options) # mac はbrewでインストールしたのでpathはok
     driver.implicitly_wait(10)
     # 去年までのデータ
     for year in range(2008, now_datetime.year):
@@ -64,36 +66,37 @@ def get_race_url_by_year_and_mon(driver, year, month):
     wait.until(EC.presence_of_all_elements_located)
 
     # 期間を選択
-    start_year_element = driver.find_element_by_name('start_year')
+    start_year_element = driver.find_element(By.NAME, 'start_year')
     start_year_select = Select(start_year_element)
     start_year_select.select_by_value(str(year))
-    start_mon_element = driver.find_element_by_name('start_mon')
+    start_mon_element = driver.find_element(By.NAME, 'start_mon')
     start_mon_select = Select(start_mon_element)
     start_mon_select.select_by_value(str(month))
-    end_year_element = driver.find_element_by_name('end_year')
+    end_year_element = driver.find_element(By.NAME, 'end_year')
     end_year_select = Select(end_year_element)
     end_year_select.select_by_value(str(year))
-    end_mon_element = driver.find_element_by_name('end_mon')
+    end_mon_element = driver.find_element(By.NAME, 'end_mon')
     end_mon_select = Select(end_mon_element)
     end_mon_select.select_by_value(str(month))
 
     # 競馬場をチェック
     for i in range(1,11):
-        terms = driver.find_element_by_id("check_Jyo_"+ str(i).zfill(2))
+        terms = driver.find_element(By.ID, "check_Jyo_"+ str(i).zfill(2))
         terms.click()
 
     # 表示件数を選択(20,50,100の中から最大の100へ)
-    list_element = driver.find_element_by_name('list')
+    list_element = driver.find_element(By.NAME, 'list')
     list_select = Select(list_element)
     list_select.select_by_value("100")
 
     # フォームを送信
-    frm = driver.find_element_by_css_selector("#db_search_detail_form > form")
+    frm = driver.find_element(By.CSS_SELECTOR, "#db_search_detail_form > form")
     frm.submit()
     time.sleep(1)
     wait.until(EC.presence_of_all_elements_located)
 
-    total_num_and_now_num = driver.find_element_by_xpath("//*[@id='contents_liquid']/div[1]/div[2]").text
+    total_num_and_now_num = driver.find_element(By.XPATH, "//*[@id='horse_detail']/div[1]/div[2]").text
+    print(total_num_and_now_num)
     total_num = int(re.search(r'(.*)件中', total_num_and_now_num).group().strip("件中"))
 
     pre_url_num = 0
@@ -109,13 +112,13 @@ def get_race_url_by_year_and_mon(driver, year, month):
                 time.sleep(1)
                 wait.until(EC.presence_of_all_elements_located)
 
-                all_rows = driver.find_element_by_class_name('race_table_01').find_elements_by_tag_name("tr")
+                all_rows = driver.find_element(By.CLASS_NAME, 'race_table_01').find_elements(By.TAG_NAME, "tr")
                 total += len(all_rows)-1
                 for row in range(1, len(all_rows)):
-                    race_href = all_rows[row].find_elements_by_tag_name("td")[4].find_element_by_tag_name("a").get_attribute("href")
+                    race_href = all_rows[row].find_elements(By.TAG_NAME, "td")[4].find_element(By.TAG_NAME, "a").get_attribute("href")
                     f.write(race_href+"\n")
                 try:
-                    target = driver.find_elements_by_link_text("次")[0]
+                    target = driver.find_elements(By.LINK_TEXT, "次")[0]
                     driver.execute_script("arguments[0].click();", target) #javascriptでクリック処理
                 except IndexError:
                     break

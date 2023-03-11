@@ -13,15 +13,15 @@ import logging
 
 logger = logging.getLogger(__name__) #ファイルの名前を渡す
 
-my_token = os.environ['LINE_TOKEN']
+# my_token = os.environ['LINE_TOKEN']
 
-def send_line_notification(message):
-    line_token = my_token
-    endpoint = 'https://notify-api.line.me/api/notify'
-    message = "\n{}".format(message)
-    payload = {'message': message}
-    headers = {'Authorization': 'Bearer {}'.format(line_token)}
-    requests.post(endpoint, data=payload, headers=headers)
+# def send_line_notification(message):
+#     line_token = my_token
+#     endpoint = 'https://notify-api.line.me/api/notify'
+#     message = "\n{}".format(message)
+#     payload = {'message': message}
+#     headers = {'Authorization': 'Bearer {}'.format(line_token)}
+#     requests.post(endpoint, data=payload, headers=headers)
 
 def update():
     get_race_url()
@@ -32,13 +32,13 @@ def update():
 if __name__ == '__main__':
     try:
         formatter_func = "%(asctime)s - %(module)s.%(funcName)s [%(levelname)s]\t%(message)s" # フォーマットを定義
-        logging.basicConfig(filename='logfile/'+OWN_FILE_NAME+'.logger.log', level=logging.INFO, format=formatter_func)
+        # logging.basicConfig(filename='logfile/'+OWN_FILE_NAME+'.logger.log', level=logging.INFO, format=formatter_func)
         logger.info("start updating!")
         update()
-        send_line_notification(OWN_FILE_NAME+" end!")
+        # send_line_notification(OWN_FILE_NAME+" end!")
     except Exception as e:
         t, v, tb = sys.exc_info()
         for str in traceback.format_exception(t,v,tb):
             str = "\n"+str
             logger.error(str)
-            send_line_notification(str)
+            # send_line_notification(str)
